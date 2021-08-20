@@ -1,15 +1,16 @@
 import "./App.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 function App() {
   const [todoList, setTodoList] = useState([
-    { name: "Learn Javascript", isCompleted: false },
-    { name: "Learn React", isCompleted: false },
+    { name: "Learn Javascript", isCompleted: false, edit: false },
+    { name: "Learn React", isCompleted: false, edit: false },
   ]);
   const [inputvalue, setInputValue] = useState("");
   const tick = document.getElementsByClassName("toggle");
   const liler = document.getElementsByClassName("myli");
   const filterbtns = document.getElementsByClassName("filterbtn");
+  const [editvalue, seteditvalue] = useState("");
 
   const handleActive = (item) => {
     setTodoList(
@@ -31,6 +32,7 @@ function App() {
       {
         isCompleted: false,
         name: inputvalue,
+        edit: false,
       },
     ]);
 
@@ -130,9 +132,32 @@ function App() {
     setTodoList(todoList.filter((item) => !item.isCompleted));
   };
 
+  const showEditInput = (e, item) => {
+    e.target.nextElementSibling.nextElementSibling.classList.remove(
+      "passiveinput"
+    );
+    e.target.nextElementSibling.nextElementSibling.classList.add("activeinput");
+  };
+
   useEffect(() => {
     filterbtns[0].click();
   }, [filterbtns]);
+
+  // const editEnter = useCallback((e, item) => {
+  //   if (e.keyCode === 13) {
+  //     item.name = editvalue;
+  //   }
+  // }, []);
+
+  const editEnter = (e, item) => {
+    if (e.keyCode === 13) {
+      console.log("enterlandi");
+      item.name = editvalue;
+      seteditvalue("");
+      e.target.classList.remove("activeinput");
+      e.target.classList.add("passiveinput");
+    }
+  };
 
   return (
     <div className="App">
@@ -169,11 +194,21 @@ function App() {
                     type="checkbox"
                     onClick={() => handleActive(item)}
                   />
-                  <label>{item.name}</label>
+                  <label onClick={(e) => showEditInput(e, item)}>
+                    {item.name}
+                  </label>
                   <button
                     className="destroy"
                     onClick={() => deleteItem(item)}
                   ></button>
+                  <input
+                    className="passiveinput"
+                    type="text"
+                    placeholder="Edit todo..."
+                    onChange={(e) => seteditvalue(e.target.value)}
+                    onKeyDown={(e) => editEnter(e, item)}
+                    autoFocus
+                  />
                 </div>
               </li>
             ))}

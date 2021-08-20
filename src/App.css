@@ -331,3 +331,32 @@ html .clear-completed:active {
 .myli {
   padding-left: 10px;
 }
+
+.view {
+  position: relative;
+}
+
+.passiveinput {
+  position: absolute;
+  top: 0;
+  left: 10rem;
+  width: 50%;
+  height: 92%;
+  opacity: 0.5;
+  font-size: 1.3rem;
+  font-weight: bolder;
+  padding-left: 1rem;
+  visibility: hidden;
+}
+
+.activeinput {
+  position: absolute;
+  top: 0;
+  left: 55px;
+  width: 70%;
+  height: 92%;
+  font-size: 1.3rem;
+  font-weight: bolder;
+  padding-left: 1rem;
+  opacity: 1;
+}
