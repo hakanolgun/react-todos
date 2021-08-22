@@ -1,39 +1,31 @@
 import "./App.css";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 function App() {
   const [todoList, setTodoList] = useState([
-    { name: "Learn Javascript", isCompleted: false, edit: false },
-    { name: "Learn React", isCompleted: false, edit: false },
+    { id: 1, name: "Learn Javascript", isCompleted: false, edit: false },
+    { id: 2, name: "Learn React", isCompleted: false, edit: false },
   ]);
   const [inputvalue, setInputValue] = useState("");
-  const tick = document.getElementsByClassName("toggle");
-  const liler = document.getElementsByClassName("myli");
   const filterbtns = document.getElementsByClassName("filterbtn");
   const [editvalue, seteditvalue] = useState("");
 
-  const handleActive = (item) => {
+  const [filter, setFilter] = useState(null);
+  const [checkAll, setCheckAll] = useState(false);
+
+  const handleActive = (id) => {
     setTodoList(
-      todoList.map((newitem) =>
-        newitem === item
-          ? { ...newitem, isCompleted: !newitem.isCompleted }
-          : newitem
+      todoList.map((item) =>
+        item.id === id ? { ...item, isCompleted: !item.isCompleted } : item
       )
     );
   };
 
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-  };
   const handleSubmit = (e) => {
     e.preventDefault();
     setTodoList([
       ...todoList,
-      {
-        isCompleted: false,
-        name: inputvalue,
-        edit: false,
-      },
+      { id: Date.now(), isCompleted: false, name: inputvalue, edit: false },
     ]);
 
     setInputValue("");
@@ -44,89 +36,24 @@ function App() {
   };
 
   const handleAllActive = () => {
-    const hepsiCompletedMi = todoList.every((item) => item.isCompleted);
-    const hepsiFalseMu = todoList.every((item) => !item.isCompleted);
-
-    if (hepsiCompletedMi) {
-      setTodoList(
-        todoList.map((item) =>
-          item
-            ? { ...item, isCompleted: false }
-            : { ...item, isCompleted: true }
-        )
-      );
-      for (let i = 0; i < tick.length; i++) {
-        tick[i].checked = false;
-      }
-    } else if (hepsiFalseMu) {
-      setTodoList(
-        todoList.map((item) =>
-          item
-            ? { ...item, isCompleted: true }
-            : { ...item, isCompleted: false }
-        )
-      );
-      for (let i = 0; i < tick.length; i++) {
-        tick[i].checked = true;
-      }
-    } else {
-      setTodoList(
-        todoList.map((item) =>
-          item
-            ? { ...item, isCompleted: true }
-            : { ...item, isCompleted: false }
-        )
-      );
-      for (let i = 0; i < tick.length; i++) {
-        if (tick[i].checked === false) {
-          tick[i].checked = true;
-        }
-      }
-    }
+    const yeniListe = [...todoList];
+    yeniListe.forEach((item) => {
+      item.isCompleted = !checkAll;
+    });
+    setTodoList(yeniListe);
+    setCheckAll(!checkAll);
   };
 
-  const handleFilterAll = (e) => {
-    //tıklanan butona css veriyorum, seçili olan görülsün diye
-    for (let z = 0; z < filterbtns.length; z++) {
-      filterbtns[z].classList.remove("selected");
+  const filteredData = useMemo(() => {
+    switch (filter) {
+      case "active":
+        return todoList.filter((item) => !item.isCompleted);
+      case "completed":
+        return todoList.filter((item) => item.isCompleted);
+      default:
+        return todoList;
     }
-    e.target.classList.add("selected");
-
-    //class'ı gizli olan tüm li elementlerini tekrar görünür yapıyorum
-    for (let i = 0; i < liler.length; i++) {
-      liler[i].classList.remove("hidden");
-    }
-  };
-  const handleFilterActive = (e) => {
-    for (let z = 0; z < filterbtns.length; z++) {
-      filterbtns[z].classList.remove("selected");
-    }
-    e.target.classList.add("selected");
-
-    //completed olan lileri gizliyorum, diğerlerini görünür yapıyorum
-    for (let i = 0; i < liler.length; i++) {
-      if (liler[i].classList.contains("completed")) {
-        liler[i].classList.add("hidden");
-      } else {
-        liler[i].classList.remove("hidden");
-      }
-    }
-  };
-  const handleFilterCompleted = (e) => {
-    for (let z = 0; z < filterbtns.length; z++) {
-      filterbtns[z].classList.remove("selected");
-    }
-    e.target.classList.add("selected");
-
-    //completed olan lileri görünür yapıp, diğerlerini gizliyorum
-    for (let i = 0; i < liler.length; i++) {
-      if (!liler[i].classList.contains("completed")) {
-        liler[i].classList.add("hidden");
-      } else {
-        liler[i].classList.remove("hidden");
-      }
-    }
-  };
+  }, [todoList, filter]);
 
   const handleClearCompleted = () => {
     setTodoList(todoList.filter((item) => !item.isCompleted));
@@ -143,15 +70,8 @@ function App() {
     filterbtns[0].click();
   }, [filterbtns]);
 
-  // const editEnter = useCallback((e, item) => {
-  //   if (e.keyCode === 13) {
-  //     item.name = editvalue;
-  //   }
-  // }, []);
-
   const editEnter = (e, item) => {
     if (e.keyCode === 13) {
-      console.log("enterlandi");
       item.name = editvalue;
       seteditvalue("");
       e.target.classList.remove("activeinput");
@@ -169,6 +89,7 @@ function App() {
             title="Mark all as completed"
             type="checkbox"
             onClick={handleAllActive}
+            checked={checkAll}
           />
           <form onSubmit={handleSubmit}>
             <input
@@ -176,23 +97,25 @@ function App() {
               placeholder="What needs to be done?"
               value={inputvalue}
               autofocus
-              onChange={(e) => handleInputChange(e)}
+              onChange={(e) => setInputValue(e.target.value)}
             />
           </form>
         </header>
 
         <section className="main">
           <ul className="todo-list">
-            {todoList.map((item, key) => (
+            {filteredData.map((item, key) => (
               <li
                 className={item.isCompleted ? "completed myli" : "myli"}
                 key={key}
               >
                 <div className="view">
                   <input
+                    id={item.id}
                     className="toggle"
                     type="checkbox"
-                    onClick={() => handleActive(item)}
+                    onClick={() => handleActive(item.id)}
+                    checked={item.isCompleted}
                   />
                   <label onClick={(e) => showEditInput(e, item)}>
                     {item.name}
@@ -223,21 +146,18 @@ function App() {
 
           <div className="filters">
             <button
-              onClick={(e) => handleFilterAll(e)}
+              onClick={() => setFilter(null)}
               className="filterbtn allbtn"
             >
               All
             </button>
 
-            <button
-              onClick={(e) => handleFilterActive(e)}
-              className="filterbtn"
-            >
+            <button onClick={() => setFilter("active")} className="filterbtn">
               Active
             </button>
 
             <button
-              onClick={(e) => handleFilterCompleted(e)}
+              onClick={() => setFilter("completed")}
               className="filterbtn"
             >
               Completed
