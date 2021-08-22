@@ -10,6 +10,9 @@ function App() {
       edit: false,
     },
     { id: 2, name: "Learn React", isCompleted: false, edit: false },
+    { id: 3, name: "Learn Redux", isCompleted: false, edit: false },
+    { id: 4, name: "Learn Formik", isCompleted: false, edit: false },
+    { id: 5, name: "Do 10 Projects", isCompleted: false, edit: false },
   ]);
   const [inputvalue, setInputValue] = useState("");
   const filterbtns = document.getElementsByClassName("filterbtn");
