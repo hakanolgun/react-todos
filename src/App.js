@@ -3,7 +3,12 @@ import { useState, useEffect, useMemo } from "react";
 
 function App() {
   const [todoList, setTodoList] = useState([
-    { id: 1, name: "Learn Javascript", isCompleted: false, edit: false },
+    {
+      id: 1,
+      name: "Learn Javascript",
+      isCompleted: false,
+      edit: false,
+    },
     { id: 2, name: "Learn React", isCompleted: false, edit: false },
   ]);
   const [inputvalue, setInputValue] = useState("");
@@ -25,7 +30,12 @@ function App() {
     e.preventDefault();
     setTodoList([
       ...todoList,
-      { id: Date.now(), isCompleted: false, name: inputvalue, edit: false },
+      {
+        id: Date.now(),
+        isCompleted: false,
+        name: inputvalue,
+        edit: false,
+      },
     ]);
 
     setInputValue("");
@@ -59,25 +69,20 @@ function App() {
     setTodoList(todoList.filter((item) => !item.isCompleted));
   };
 
-  const showEditInput = (e, item) => {
-    e.target.nextElementSibling.nextElementSibling.classList.remove(
-      "passiveinput"
-    );
-    e.target.nextElementSibling.nextElementSibling.classList.add("activeinput");
+  const showEditInput = (item) => {
+    item.edit ? (item.edit = false) : (item.edit = true);
+    setTodoList(todoList.filter((item) => item));
   };
-
-  useEffect(() => {
-    filterbtns[0].click();
-  }, [filterbtns]);
-
   const editEnter = (e, item) => {
     if (e.keyCode === 13) {
       item.name = editvalue;
       seteditvalue("");
-      e.target.classList.remove("activeinput");
-      e.target.classList.add("passiveinput");
+      item.edit = false;
     }
   };
+  useEffect(() => {
+    filterbtns[0].click();
+  }, [filterbtns]);
 
   return (
     <div className="App">
@@ -117,17 +122,16 @@ function App() {
                     onClick={() => handleActive(item.id)}
                     checked={item.isCompleted}
                   />
-                  <label onClick={(e) => showEditInput(e, item)}>
-                    {item.name}
-                  </label>
+                  <label onClick={() => showEditInput(item)}>{item.name}</label>
                   <button
                     className="destroy"
                     onClick={() => deleteItem(item)}
                   ></button>
                   <input
-                    className="passiveinput"
+                    className={
+                      item.edit === false ? "passiveinput" : "activeinput"
+                    }
                     type="text"
-                    placeholder="Edit todo..."
                     onChange={(e) => seteditvalue(e.target.value)}
                     onKeyDown={(e) => editEnter(e, item)}
                     autoFocus
